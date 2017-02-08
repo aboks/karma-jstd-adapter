@@ -7647,12 +7647,17 @@ jstestdriver.plugins.TestCaseManagerPlugin.prototype.getTestRunsConfigurationFor
         });
     }
 
+    function isUnimplementedStartFn(startFn) {
+        return startFn.toString().indexOf('You need to include some adapter that implements __karma__.start method!') !== -1;
+    }
+
     /**
      * Returns the function needed to start running the tests.
      *
      * @param  {Object} karma Karma runner instance
+     * @param  {Function} previousStartFn previous start function (to allow chaining)
      */
-    function createStartFn(karma) {
+    function createStartFn(karma, previousStartFn) {
         jstestdriver.console = new jstestdriver.Console();
         jstestdriver.config.createRunner(jstestdriver.config.createStandAloneExecutor,
             jstestdriver.plugins.pausingRunTestLoop);
@@ -7663,7 +7668,11 @@ jstestdriver.plugins.TestCaseManagerPlugin.prototype.getTestRunsConfigurationFor
                 function(test) {
                     afterTest(karma, test);
                 }, function() {
-                    afterRun(karma);
+                    if (isUnimplementedStartFn(previousStartFn)) {
+                        afterRun(karma);
+                    } else {
+                        previousStartFn.apply(karma);
+                    }
                 }, true );
         };
     }
@@ -7677,7 +7686,7 @@ jstestdriver.plugins.TestCaseManagerPlugin.prototype.getTestRunsConfigurationFor
         };
     }
 
-    window.__karma__.start = createStartFn(window.__karma__);
+    window.__karma__.start = createStartFn(window.__karma__, window.__karma__.start);
     window.dump = createDumpFn(window.__karma__, function (value) {
         return value;
     });
