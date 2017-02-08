@@ -1,6 +1,6 @@
 {
   "name": "karma-jstd-adapter",
-  "version": "0.0.3",
+  "version": "0.0.4-chaining",
   "description": "An adapter for karma, so you can run your js-test-driver tests.",
   "main": "jstd-adapter.js",
   "scripts": {
